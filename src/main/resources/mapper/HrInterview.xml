@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 配置dao接口路径-->
+<mapper namespace="cn.com.njdhy.muscle.biceps.dao.HrInterviewDao">
+
+    <!-- type配置model层实体类名-->
+    <resultMap id="HrInterviewMap" type="HrInterview">
+        <!-- 配置实体和数据库列的对应关系，property：实体属性名；column：数据库表列名；-->
+        <result property="id" column="id"></result>
+        <result property="name" column="name"></result>
+        <result property="phone" column="phone"></result>
+        <result property="age" column="age"></result>
+        <result property="workYear" column="work_year"></result>
+        <result property="workCity" column="work_city"></result>
+        <result property="expectedSalary" column="expected_salary"></result>
+        <result property="workOnTime" column="work_on_time"></result>
+        <result property="offerFlag" column="offer_flag"></result>
+        <result property="education" column="education"></result>
+        <result property="sex" column="sex"></result>
+        <result property="school" column="school"></result>
+        <result property="recommendFlag" column="recommend_flag"></result>
+        <result property="recordUser" column="record_user"></result>
+        <result property="deleteFlag" column="delete_flag"></result>
+        <result property="createDate" column="create_date"></result>
+        <result property="updateDate" column="update_date"></result>
+    </resultMap>
+
+    <!-- 配置表名 -->
+    <sql id="tableName">
+        hr_interview
+    </sql>
+
+    <!-- for insert columns -->
+    <sql id="columns">
+        id, name, tech_type, phone, age, work_year, work_city, expected_salary, work_on_time, offer_flag, education, sex, school, email, test_type, recommend_flag, record_user, delete_flag, create_date, update_date
+    </sql>
+
+    <!-- for insert value -->
+    <sql id="values">
+        #{id}, #{name}, #{techType}, #{phone}, #{age}, #{workYear}, #{workCity}, #{expectedSalary}, #{workOnTime}, #{offerFlag}, #{education}, #{sex}, #{school}, #{email}, #{testType}, #{recommendFlag}, #{recordUser}, email=#{email}, tech_tyype=#{techType} 0, NOW(), NOW()
+    </sql>
+
+    <!-- for update set -->
+    <sql id="updates">
+        name=#{name},
+        phone=#{phone},
+        age=#{age},
+        work_year=#{workYear},
+        work_city=#{workCity},
+        expected_salary=#{expectedSalary},
+        work_on_time=#{workOnTime},
+        offer_flag=#{offerFlag},
+        education=#{education},
+        sex=#{sex},
+        school=#{school},
+        test_type=#{testType},
+        recommend_flag=#{recommendFlag},
+        record_user=#{recordUser},
+        delete_flag=#{deleteFlag},
+        update_date=NOW()
+        email=#{email}
+        tech_type=#{techType}
+    </sql>
+
+
+    <!-- 根据ID查询-->
+    <select id="queryById" resultMap="HrInterviewMap" parameterType="String">
+        SELECT
+        <include refid="columns"/>
+        FROM
+        <include refid="tableName"/>
+        WHERE 1 = 1
+        AND id=#{id}
+    </select>
+
+    <!-- 批量删除-->
+    <delete id="deleteByIds" parameterType="java.util.List">
+        DELETE FROM
+        <include refid="tableName"/>
+        WHERE 1=1
+        AND id IN
+        <foreach item="id" index="index" collection="list" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <!-- 新建  useGeneratedKeys="true" 用于返回新增后的id值-->
+    <insert id="insert" parameterType="HrInterview" keyProperty="id" useGeneratedKeys="true">
+        INSERT INTO
+        <include refid="tableName"/>
+        (<include refid="columns"/>)
+        VALUES
+        (<include refid="values"/>)
+    </insert>
+
+    <!-- 修改 -->
+    <update id="update" parameterType="HrInterview">
+        UPDATE
+        <include refid="tableName"/>
+        SET
+        <include refid="updates"/>
+        WHERE 1=1
+        AND id = #{id}
+    </update>
+
+    <!-- 根据条件查询 -->
+    <select id="queryList" resultMap="HrInterviewMap" parameterType="map">
+
+        SELECT
+        <include refid="columns"/>
+        FROM
+        (
+        SELECT
+        <include refid="columns"/>
+        FROM
+        <include refid="tableName"/>
+        WHERE 1=1
+        <if test="keyword!=null and keyword!=''">
+            AND name LIKE CONCAT('%',#{keyword},'%')
+            OR phone LIKE CONCAT('%',#{keyword},'%')
+            OR work_city LIKE CONCAT('%',#{keyword},'%')
+            OR education LIKE CONCAT('%',#{keyword},'%')
+            OR school LIKE CONCAT('%',#{keyword},'%')
+            OR email LIKE CONCAT('%',#{keyword},'%')
+            OR tech_type LIKE CONCAT('%',#{keyword},'%')
+        </if>
+        ORDER BY
+        <if test="sortName!=null and sorName!='' and sortOrder !=null and sortOrder!=''">
+            #{sortName} #{sortOrder},
+        </if>
+        id desc
+        ) t
+    </select>
+
+
+</mapper>
+
