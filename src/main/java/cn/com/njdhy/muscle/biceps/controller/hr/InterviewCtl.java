@@ -3,7 +3,9 @@ package cn.com.njdhy.muscle.biceps.controller.hr;
 
 import cn.com.njdhy.muscle.biceps.controller.Query;
 import cn.com.njdhy.muscle.biceps.controller.Result;
+import cn.com.njdhy.muscle.biceps.controller.checkparam.HrInterviewParamsCheck;
 import cn.com.njdhy.muscle.biceps.exception.ApplicationException;
+import cn.com.njdhy.muscle.biceps.exception.sys.InterviewErrorCode;
 import cn.com.njdhy.muscle.biceps.exception.sys.UserErrorCode;
 import cn.com.njdhy.muscle.biceps.model.HrInterview;
 import cn.com.njdhy.muscle.biceps.model.SysRole;
@@ -35,7 +37,6 @@ public class InterviewCtl {
     @Autowired
     private HrInterviewService hrInterviewService;
 
-
     /**
      * 查询面试人员列表
      *
@@ -46,10 +47,20 @@ public class InterviewCtl {
      */
     @RequestMapping("/list")
     public Result index(@RequestParam Map<String, Object> params, Integer pageNumber, Integer pageSize) {
-        Query queryParam = new Query(params);
-        PageInfo<HrInterview> result = hrInterviewService.queryList(queryParam, pageNumber, pageSize);
 
-        return Result.success(result.getTotal(), result.getList());
+        try {
+            // 参数校验不通过
+            if (HrInterviewParamsCheck.check(params)) {
+                return Result.error(InterviewErrorCode.QUERY_PARAMS_ISNULL_ERROR_CODE, InterviewErrorCode.QUERY_PARAMS_ISNULL_ERROR_MSG);
+            }
+            Query queryParam = new Query(params);
+            PageInfo<HrInterview> result = hrInterviewService.queryList(queryParam, pageNumber, pageSize);
+            return Result.success(result.getTotal(), result.getList());
+        } catch (ApplicationException e) {
+            return Result.error(e.getCode(), e.getMessage());
+        } catch (Exception e) {
+            return Result.error(InterviewErrorCode.INSERT_ERROR_CODE, InterviewErrorCode.INSERT_ERROR_MSG);
+        }
     }
 
     /**
@@ -60,13 +71,24 @@ public class InterviewCtl {
      */
     @RequestMapping("/{id}")
     public Result queryById(@PathVariable String id) {
-        HrInterview model = hrInterviewService.queryById(id);
 
-        if (ObjectUtils.isEmpty(model)) {
-            model = new HrInterview();
+        try {
+            // 参数校验不通过
+            if (HrInterviewParamsCheck.check(id)) {
+                return Result.error(InterviewErrorCode.INSERT_ERROR_CODE, InterviewErrorCode.INSERT_ERROR_MSG);
+            }
+            HrInterview model = hrInterviewService.queryById(id);
+            if (ObjectUtils.isEmpty(model)) {
+                model = new HrInterview();
+            }
+            return Result.success().put("model", model);
+        } catch (ApplicationException e) {
+            LOGGER.error(e.getCode(), e.getMessage());
+            return Result.error(InterviewErrorCode.INSERT_ERROR_CODE, InterviewErrorCode.INSERT_ERROR_MSG);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            return Result.error(InterviewErrorCode.INSERT_ERROR_CODE, InterviewErrorCode.INSERT_ERROR_MSG);
         }
-
-        return Result.success().put("model", model);
     }
 
     /**
@@ -77,20 +99,23 @@ public class InterviewCtl {
      */
     @RequestMapping("/insert")
     public Result insert(@RequestBody HrInterview hrInterview) {
-
         try {
-            // 校验参数
-            // TODO: 2018/3/14
+            // 校验参数不通过
+            if (HrInterviewParamsCheck.check(hrInterview)) {
+                return Result.error(InterviewErrorCode.INSERT_PARAMS_ISNULL_ERROR_CODE, InterviewErrorCode.INSERT_PARAMS_ISNULL_ERROR_MSG);
+            }
+
+            // 登记人
+            hrInterview.setRecordUser(ShiroUtil.getLoginUserName());
+
             // 执行入库操作
             hrInterviewService.insert(hrInterview);
+            return Result.success();
         } catch (ApplicationException e) {
-            return Result.error(UserErrorCode.SYS_USER_SAVE_APP_ERROR_CODE, UserErrorCode.SYS_USER_SAVE_APP_ERROR_MESSAGE);
+            return Result.error(e.getCode(), e.getMessage());
         } catch (Exception e) {
-            e.printStackTrace();
-            return Result.error(UserErrorCode.SYS_USER_SAVE_ERROR_CODE, UserErrorCode.SYS_USER_SAVE_ERROR_MESSAGE);
+            return Result.error(InterviewErrorCode.INSERT_ERROR_CODE, InterviewErrorCode.INSERT_ERROR_MSG);
         }
-
-        return Result.success();
     }
 
     /**
@@ -103,18 +128,18 @@ public class InterviewCtl {
     public Result update(@RequestBody HrInterview hrInterview) {
 
         try {
-            // 校验参数
-            // TODO: 2018/3/14
-
+            // 校验参数不通过
+            if (HrInterviewParamsCheck.check(hrInterview)) {
+                return Result.error(InterviewErrorCode.UPDATE_PARAMS_ISNULL_ERROR_CODE, InterviewErrorCode.UPDATE_PARAMS_ISNULL_ERROR_MSG);
+            }
             // 执行修改
             hrInterviewService.update(hrInterview);
+            return Result.success();
         } catch (RuntimeException e) {
-            return Result.error(UserErrorCode.SYS_USER_UPDATE_APP_ERROR_CODE, UserErrorCode.SYS_USER_UPDATE_APP_ERROR_MESSAGE);
+            return Result.error(InterviewErrorCode.UPDATE_ERROR_CODE, InterviewErrorCode.UPDATE_ERROR_MSG);
         } catch (Exception e) {
-            return Result.error(UserErrorCode.SYS_USER_UPDATE_ERROR_CODE, UserErrorCode.SYS_USER_UPDATE_ERROR_MESSAGE);
+            return Result.error(InterviewErrorCode.UPDATE_ERROR_CODE, InterviewErrorCode.UPDATE_ERROR_MSG);
         }
-
-        return Result.success();
     }
 
     /**
@@ -127,15 +152,17 @@ public class InterviewCtl {
     public Result deleteByIds(@RequestBody List<String> ids) {
 
         try {
-            // 校验参数 todo
+            // 校验参数不通过
+            if (HrInterviewParamsCheck.check(ids)) {
+                return Result.error(InterviewErrorCode.DELETE_ID_ISNULL_ERROR_CODE, InterviewErrorCode.DELETE_ID_ISNULL_ERROR_MSG);
+            }
             hrInterviewService.deleteByIds(ids);
+            return Result.success();
         } catch (ApplicationException e) {
             return Result.error(e.getCode(), e.getMsg());
         } catch (Exception e) {
             return Result.error(e.getMessage());
         }
-
-        return Result.success();
     }
 
 }

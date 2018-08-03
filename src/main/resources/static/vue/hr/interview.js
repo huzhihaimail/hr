@@ -152,7 +152,6 @@ var vm = new Vue({
         // 点击“新增”按钮
         , save: function (event) {
             // 1. 隐藏表格，显示添加页面
-            vm.showPwd = true;
             vm.show = false;
             vm.errorMessage = null;
 
@@ -160,51 +159,17 @@ var vm = new Vue({
             vm.title = PAGE_INSERT_TITLE;
             // 3. 清空表单数据
             vm.model = {};
-
-            // 4. 加载角色列表
-            vm.loadRoles();
         }
 
         // 点击“确定”按钮
         , commit: function (el) {
 
-            // 判断用户
-            if (!vm.model.userName || vm.model.userName.trim() == "") {
-                vm.errorMessage = "请输入用户名。";
-                return;
-            }
-
-            if (vm.model.userName.trim().length <= 0 || vm.model.userName.trim().length > 10) {
-                vm.errorMessage = "用户名长度不能超过10个字符。";
-                return;
-            }
-
-            // 判断昵称
-            if (!vm.model.nickName || vm.model.nickName.trim() == "") {
-                vm.errorMessage = "请输入用户昵称";
-                return;
-            }
-
-            if (vm.model.nickName.trim().length <= 0 || vm.model.nickName.trim().length > 10) {
-                vm.errorMessage = "长度不能超过10个字符。";
-                return;
-            }
-
-            // 执行新增操作
-            if (vm.model.id == null) {
-                vm.doSave();
-                return;
-            }
-
-            // 执行修改操作
-            vm.doUpdate();
+            // 执行新增或修改操作
+            (!vm.model.id) ? vm.doSave() : vm.doUpdate();
         }
 
         // 执行保存操作
         , doSave: function () {
-
-            // 获取到的用户配置的角色列表添加到后台参数
-            vm.model.userRoles = vm.userRoles;
 
             // 2. 入库
             $.ajax({
@@ -247,9 +212,6 @@ var vm = new Vue({
                 vm.title = PAGE_UPDATE_TITLE;
                 vm.model = r.model;
             });
-            // 加载角色列表
-            vm.loadRoles();
-
         }
 
         // 执行修改操作
@@ -324,14 +286,6 @@ var vm = new Vue({
             // 刷新表格数据
             bsTable.createBootStrapTable(showColumns, APP_NAME + "/sys/" + vm.moduleName + "/list?rnd=" + Math.random(), vm.queryOption);
         }
-
-        // 加载角色列表
-        , loadRoles: function () {
-            $.get(APP_NAME + "/sys/" + vm.moduleName + "/loadRoles", function (r) {
-                vm.roles = r.page;
-            });
-        }
-
     }
 });
 

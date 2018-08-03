@@ -38,7 +38,7 @@
 
     <!-- for insert value -->
     <sql id="values">
-        #{id}, #{name}, #{techType}, #{phone}, #{age}, #{workYear}, #{workCity}, #{expectedSalary}, #{workOnTime}, #{offerFlag}, #{education}, #{sex}, #{school}, #{email}, #{testType}, #{recommendFlag}, #{recordUser}, email=#{email}, tech_tyype=#{techType} 0, NOW(), NOW()
+        #{id}, #{name}, #{techType}, #{phone}, #{age}, #{workYear}, #{workCity}, #{expectedSalary}, #{workOnTime}, #{offerFlag}, #{education}, #{sex}, #{school}, #{email}, #{testType}, #{recommendFlag}, #{recordUser}, 0, NOW(), NOW()
     </sql>
 
     <!-- for update set -->

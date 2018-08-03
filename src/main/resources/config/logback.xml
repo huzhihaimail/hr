@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <!--定义日志文件的存储地址 勿在 LogBack 的配置中使用相对路径 -->
-    <property name="LOG_HOME" value="/usr/logs/biceps"/>
-    <property name="SYS_NAME" value="biceps"/>
+    <property name="LOG_HOME" value="/opt/logs/hr"/>
+    <property name="SYS_NAME" value="hr"/>
 
     <!-- 控制台输出 -->
     <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
